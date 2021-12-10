@@ -10,3 +10,7 @@ Entiendo que esperar_respuesta quedaría:
 Pero no es posible ejecutar esto ya que saludar no regresa el mensaje y si saco el método responder no se ejecutará automáticamente al recibir un saludo.
 
 Gracias
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+Actualicé el código en mi repo :)
