@@ -46,10 +46,10 @@ class ObjetoSeguro:
     # Metodo privado que almacena un mensaje recibido en un archivo de texto
     def __almacenar_msj(self, msj: str) -> dict:
         aux = dict(
-            ID=self.conteoMensajes,
+            ID=self.__conteoMensajes,
             MSJ=msj
         )
-        self.conteoMensajes += 1
+        self.__conteoMensajes += 1
         logging.debug("{}".format(aux))
         archivo = open(f"RegistoMsj_{self.nombre}.txt", "a")
         with archivo as f:
@@ -95,7 +95,7 @@ class ObjetoSeguro:
 
     # Metodo publico que recibe un saludo con un mensaje cifrado
     def saludar(self, name: str, msj: str):
-        self.mensajeRecibido = msj
+        self.__mensajeRecibido = msj
         print(f"Hola soy {name} y me quiero comunicar contigo")
         # print(f"Te envio el mensaje cifrado: {msj}")
         self.esperar_respuesta(self.responder(name))
@@ -105,12 +105,12 @@ class ObjetoSeguro:
     def responder(self, msj: str) -> bytes:
         print(f"Hola {msj} recibi tu mensaje")
         mensaje_respuesta = self.__codificar64("MensajeRespuesta")
-        return mensaje_respuesta + self.mensajeRecibido
+        return bytes(self.__mensajeRecibido + mensaje_respuesta)
 
     def esperar_respuesta(self, msj: bytes):
         print("Procesando una respuesta")
         mensaje_respuesta = self.__codificar64("MensajeRespuesta")
-        mensaje_codificado = msj.lstrip(mensaje_respuesta)
+        mensaje_codificado = msj.rstrip(mensaje_respuesta)
         # print(self.decodificar64(self.descifrar_msj(mensaje_codificado)))
         self.__almacenar_msj(self.__decodificar64(self.descifrar_msj(mensaje_codificado)))
         return
