@@ -3,29 +3,27 @@
 #   Proyecto final - socket_servidor
 #   Nayeli Gissel Larios Pérez
 from concurrent.futures import ThreadPoolExecutor
-from objetoSeguro import ObjetoSeguro
 import logging
 import socket
 
-logging.basicConfig(format='DEBUG : %(message)s',
+LOCAL_HOST = '127.0.0.1'
+logging.basicConfig(format='\tDEBUG : %(message)s',
                     level=logging.DEBUG)
 
 
 class SocketServer:
-    def __init__(self, id_servidor: str):
+    def __init__(self, puerto: int):
         # atributos de la clase SocketServer
         # Crea el socket de comunicacion de tipo stream
         self.connection = None
         self.node = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Se especifica la ip y el puerto de conexion
-        self.port_and_ip = ('127.0.0.1', 12345)
+        self.port_and_ip = (LOCAL_HOST, puerto)
         # Administrador de threads un hilo para recepcion y otro para transmision
-        self.tpe_comunicacion = ThreadPoolExecutor(max_workers=2)
+        self.tpe_comunicacion = ThreadPoolExecutor(max_workers=3)
         # Atributo donde se almacena la respuesta
         self.resp = ""
-        self.mensaje_seguro = ObjetoSeguro("s"+id_servidor)
-        self.llavePublicaReceptor = bytearray()
-        logging.debug(">SERVIDOR socket creado")
+        logging.debug("SERVIDOR : socket creado {}".format(self.port_and_ip))
 
     def bind(self):
         # El socket solo se puede ver desde la misma maquina
@@ -38,13 +36,13 @@ class SocketServer:
     def accept(self):
         # Acepta conexiones
         self.connection, addr = self.node.accept()
-        logging.debug(">SERVIDOR acepta conexion : {} puerto {}".format(addr[0], addr[1]))
+        logging.debug("SERVIDOR : acepta conexion -> {}".format(addr))
 
     # Metodo que cierra el socket
     def close(self):
         self.node.shutdown(socket.SHUT_RDWR)
         self.node.close()
-        logging.debug(">SERVIDOR socket cerrado")
+        logging.debug("SERVIDOR : socket cerrado")
 
     # Metodo que envia el mensaje por el socket
     def send_sms(self, sms):
@@ -56,11 +54,11 @@ class SocketServer:
             if self.resp == "":
                 pass
             else:
-                aux = self.mensaje_seguro.nombre + ":" + self.resp
+                aux = ":" + self.resp
                 logging.debug("<<{}".format(aux))
                 self.send_sms(aux)
                 self.resp = ""
-        self.send_sms(self.mensaje_seguro.nombre + ":exit")
+        self.send_sms(":exit")
 
     # Metodo que procesa los datos que se reciben por el socket
     def read(self):
@@ -78,7 +76,7 @@ class SocketServer:
     def inicializa_socket(self):
         self.bind()
         self.listen()
-        self.accept()
+        return self.tpe_comunicacion.submit(self.accept)
 
     # Metodo que ejecuta los hilos de comunicacion
     def comunicacion(self):
@@ -92,4 +90,3 @@ class SocketServer:
     def saludo(self):
 
         pass
-

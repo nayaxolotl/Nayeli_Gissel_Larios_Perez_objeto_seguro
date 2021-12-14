@@ -3,36 +3,40 @@
 #   Proyecto final - socket_cliente
 #   Nayeli Gissel Larios Pérez
 from concurrent.futures import ThreadPoolExecutor
-from objetoSeguro import ObjetoSeguro
 import logging
 import socket
 
-logging.basicConfig(format='DEBUG : %(message)s',
+LOCAL_HOST = '127.0.0.1'
+logging.basicConfig(format='\tDEBUG : %(message)s',
                     level=logging.DEBUG)
 
 
 class SocketClient:
-    def __init__(self, id_cliente: str):
+    def __init__(self, puerto: int):
         # atributos de la clase SocketClient
         # Crea el socket de comunicacion de tipo stream
         self.node = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Se especifica la ip y el puerto de conexion
-        self.port_and_ip = ('127.0.0.1', 12345)
+        self.port_and_ip = ('127.0.0.1', puerto)
         # Administrador de threads un hilo para recepcion y otro para transmision
-        self.tpe_comunicacion = ThreadPoolExecutor(max_workers=3)
+        self.tpe_comunicacion = ThreadPoolExecutor(max_workers=4)
         # Atributo donde se almacena la respuesta
         self.resp = ""
-        self.mensaje_seguro = ObjetoSeguro("c"+id_cliente)
-        self.llavePublicaReceptor = bytearray()
-        logging.debug(">CLIENTE socket creado")
+        logging.debug("CLIENTE : socket creado {}".format(self.port_and_ip))
+
+    # Metodo que buscara servidor al que se quiere conectar hasta encontrarlo
+    def busca_servidor(self):
+        while True:
+            try:
+                self.node.connect(self.port_and_ip)
+                break
+            except ConnectionRefusedError:
+                pass
+        logging.debug("CLIENTE : conectado a {}".format(self.port_and_ip))
 
     def connect(self):
         # Conecta el socket a la direccion especificada
-        try:
-            self.node.connect(self.port_and_ip)
-        except ConnectionRefusedError:
-            logging.debug(">CLIENTE socket servidor en {} no esta activo".format(self.port_and_ip[0]))
-        logging.debug(">CLIENTE socket conectado a {} puerto {}".format(self.port_and_ip[0], self.port_and_ip[1]))
+        return self.tpe_comunicacion.submit(self.busca_servidor)
 
     # Metodo que cierra el socket
     def close(self):
@@ -51,7 +55,7 @@ class SocketClient:
             if self.resp == "":
                 pass
             else:
-                aux = self.mensaje_seguro.nombre + ":" + self.resp
+                aux = ":" + self.resp
                 logging.debug(">>{}".format(aux))
                 self.send_sms(aux)
 

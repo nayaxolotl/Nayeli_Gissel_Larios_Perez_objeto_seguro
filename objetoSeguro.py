@@ -2,25 +2,32 @@
 #   Python y Linux
 #   PL_Proyecto1 - Objeto seguro
 #   Nayeli Gissel Larios Pérez
+from select import select
+from sqlite3 import connect
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 import base64
 import logging
+from socket_cliente import SocketClient
+from socket_servidor import SocketServer
 
-logging.basicConfig(format='DEBUG : %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='\tDEBUG : %(message)s', level=logging.DEBUG)
 
 KEY_SIZE = 32  # Para AES-256
 
 
 # Clase ObjetoSeguro
 class ObjetoSeguro:
-    def __init__(self, nombre: str):
+    def __init__(self, nombre: str, puerto_servidor: int, puerto_cliente: int):
         # Atributos de la clase ObjetoSeguro
+        logging.debug("OBJETO : {}".format(nombre))
         self.nombre = nombre
         self.llavePublica, self.__llavePrivada = self.__gen_llaves()
         self.__conteoMensajes = 0
         self.__mensajeRecibido = ""
+        self.socketcliente = SocketClient(puerto_cliente)
+        self.socketservidor = SocketServer(puerto_servidor)
 
     # Métodos del ObjetoSeguro
     # Metodo privado que, al instanciar el objeto genera la llave publica y privada
@@ -59,7 +66,7 @@ class ObjetoSeguro:
 
     # Metodo privado que almacena un mensaje recibido en un archivo de texto
     @staticmethod
-    def __consultar_msj(id: int) -> dict:
+    def __consultar_msj(identificador: int) -> dict:
         archivo = open("RegistoMsj_{self.nombre}.txt", "r")
         with archivo as f:
             for texto in f:
@@ -67,7 +74,7 @@ class ObjetoSeguro:
                 extrae_id = linea[0].split(":")
                 extrae_txt = linea[1].split(":")
                 if int(extrae_id[1]) == id:
-                    print(f"ID {id}: {extrae_txt[1]}")
+                    print(f"ID {identificador}: {extrae_txt[1]}")
         aux = dict(
             ID=id,
             MSJ=extrae_txt[1]
@@ -102,16 +109,22 @@ class ObjetoSeguro:
         return
 
     # Metodo publico que procesa una respuesta a un saludo recibido
-    def responder(self, msj: str) -> bytes:
+    def responder(self, msj):
         print(f"Hola {msj} recibi tu mensaje")
         mensaje_respuesta = self.__codificar64("MensajeRespuesta")
-        return bytes(self.__mensajeRecibido + mensaje_respuesta)
+        return self.__mensajeRecibido + mensaje_respuesta
 
-    def esperar_respuesta(self, msj: bytes):
+    def esperar_respuesta(self, msj):
         print("Procesando una respuesta")
         mensaje_respuesta = self.__codificar64("MensajeRespuesta")
         mensaje_codificado = msj.rstrip(mensaje_respuesta)
         # print(self.decodificar64(self.descifrar_msj(mensaje_codificado)))
         self.__almacenar_msj(self.__decodificar64(self.descifrar_msj(mensaje_codificado)))
         return
-    
+
+    def espera_conexion(self):
+        inicializa = self.socketservidor.inicializa_socket()
+        conectar = self.socketcliente.connect()
+        while not conectar.done() and not inicializa.done():
+            pass
+        logging.debug("OBJETO : Conexion completa")
