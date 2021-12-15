@@ -47,8 +47,7 @@ class SocketClient:
     # Metodo que envia el mensaje por el socket
     def send_sms(self, sms):
         self.node.send(sms.encode())
-        if sms != "exit":
-            self.resp = ""
+        self.resp = ""
 
     # Metodo que procesa la informacion que se va a mandar
     def write(self):
@@ -58,6 +57,9 @@ class SocketClient:
             else:
                 aux = self.resp
                 self.send_sms(aux)
+        self.send_sms("exit")
+        logging.debug("CLIENTE : exit")
+        return
 
     # Metodo que recibe un texto a enviar desde le programa
     def write_text(self, texto):
