@@ -131,9 +131,9 @@ class ObjetoSeguro:
             self.socketcliente.write_text(mensaje)
 
     def termina_comunicacion(self):
-        while not self.read.done() and not self.write.done():
-            if self.write.done():
-                pass
+        while not self.write.done(): # and not self.write.done():
+            pass
+        self.read.cancel()
         self.captura.cancel()
         self.socketcliente.close()
         self.socketservidor.close()

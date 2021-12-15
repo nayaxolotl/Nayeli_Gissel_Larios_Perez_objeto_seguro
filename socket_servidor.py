@@ -54,7 +54,7 @@ class SocketServer:
 
     # Metodo que procesa los datos que se reciben por el socket
     def read(self):
-        msg = ""
+        msg = ''
         while msg != "exit":
             # Se indica que recibira mensajes de tamano SIZE_MSG
             msg = self.connection.recv(SIZE_MSG).decode()

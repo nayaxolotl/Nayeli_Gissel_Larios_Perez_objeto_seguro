@@ -65,14 +65,3 @@ class SocketClient:
     def write_text(self, texto):
         self.resp = texto
 
-    # Metodo que procesa los datos que se reciben por el socket
-    def read(self):
-        message = ""
-        while message == "":
-            # Se indica que recibira mensajes de tamano
-            message = self.node.recv(20).decode()
-            if message != "":
-                logging.debug("<<{}".format(message))
-                extrae = message.split(":")
-                if extrae[1] != "exit":
-                    message = ""
