@@ -13,7 +13,7 @@ if __name__ == '__main__':
     puerto_destino = int(input("Puerto destino : "))
     Mensajero = ObjetoSeguro(nombre, mi_puerto, puerto_destino)
     Mensajero.espera_conexion()
-    
+    Mensajero.inicia_comunicacion()
 
 
 # Comunicacion Obj2 -> Obj1

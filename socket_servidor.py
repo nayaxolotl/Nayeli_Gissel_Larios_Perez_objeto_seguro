@@ -7,6 +7,7 @@ import logging
 import socket
 
 LOCAL_HOST = '127.0.0.1'
+SIZE_MSG = 1024
 logging.basicConfig(format='\tDEBUG : %(message)s',
                     level=logging.DEBUG)
 
@@ -23,6 +24,7 @@ class SocketServer:
         self.tpe_comunicacion = ThreadPoolExecutor(max_workers=3)
         # Atributo donde se almacena la respuesta
         self.resp = ""
+        self.ultimo_mensaje = ""
         logging.debug("SERVIDOR : socket creado {}".format(self.port_and_ip))
 
     def bind(self):
@@ -48,45 +50,17 @@ class SocketServer:
     def send_sms(self, sms):
         self.connection.send(sms.encode())
 
-    # Metodo que procesa la informacion que se va a mandar
-    def write(self):
-        while self.resp != "exit":
-            if self.resp == "":
-                pass
-            else:
-                aux = ":" + self.resp
-                logging.debug("<<{}".format(aux))
-                self.send_sms(aux)
-                self.resp = ""
-        self.send_sms(":exit")
-
     # Metodo que procesa los datos que se reciben por el socket
     def read(self):
         msg = ""
-        extrae = ["", ""]
-        while extrae[1] != "exit":
-            # Se indica que recibira mensajes de tamano 20
-            msg = self.connection.recv(20).decode()
-            logging.debug(">>{}".format(msg))
-            extrae = msg.split(":")
-            self.resp = str("ok")
-        self.resp = str("exit")
+        while msg != "exit":
+            # Se indica que recibira mensajes de tamano SIZE_MSG
+            msg = self.connection.recv(SIZE_MSG).decode()
+            self.ultimo_mensaje = msg
+            print(f">{msg}")
 
     # Metodo que llama a los metodos necesarios para iniciar una conexion
     def inicializa_socket(self):
         self.bind()
         self.listen()
         return self.tpe_comunicacion.submit(self.accept)
-
-    # Metodo que ejecuta los hilos de comunicacion
-    def comunicacion(self):
-        write = self.tpe_comunicacion.submit(self.write)
-        read = self.tpe_comunicacion.submit(self.read)
-        self.saludo()
-        while not write.done() and not read.done():
-            pass
-        self.close()
-
-    def saludo(self):
-
-        pass

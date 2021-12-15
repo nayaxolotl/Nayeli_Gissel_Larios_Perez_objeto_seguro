@@ -4,7 +4,7 @@
 #   Nayeli Gissel Larios Pérez
 from select import select
 from sqlite3 import connect
-
+from concurrent.futures import ThreadPoolExecutor
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 import base64
@@ -28,6 +28,11 @@ class ObjetoSeguro:
         self.__mensajeRecibido = ""
         self.socketcliente = SocketClient(puerto_cliente)
         self.socketservidor = SocketServer(puerto_servidor)
+        self.comunicacion = ThreadPoolExecutor(max_workers=3)
+        self.llavePublicaReceptor = bytearray()
+        self.write = None
+        self.read = None
+        self.captura = None
 
     # Métodos del ObjetoSeguro
     # Metodo privado que, al instanciar el objeto genera la llave publica y privada
@@ -98,12 +103,12 @@ class ObjetoSeguro:
     # Metodo publico con el que se obtiene la llave publica del objeto
     # No es string por que la biblioteca crea las llaves con otro formato
     def llave_publica(self):
-        return self.llavePublica
+        return str(self.llavePublica)
 
     # Metodo publico que recibe un saludo con un mensaje cifrado
     def saludar(self, name: str, msj: str):
         self.__mensajeRecibido = msj
-        print(f"Hola soy {name} y me quiero comunicar contigo")
+        # print(f"Hola soy {name} y me quiero comunicar contigo")
         # print(f"Te envio el mensaje cifrado: {msj}")
         self.esperar_respuesta(self.responder(name))
         return
@@ -128,3 +133,31 @@ class ObjetoSeguro:
         while not conectar.done() and not inicializa.done():
             pass
         logging.debug("OBJETO : Conexion completa")
+
+    def inicia_comunicacion(self):
+        self.write = self.comunicacion.submit(self.socketcliente.write)
+        self.read = self.comunicacion.submit(self.socketservidor.read)
+        self.intercambia_llaves()
+        logging.debug("OBJETO : ---------------inicia conexion segura---------------")
+        self.comunicacion.submit(self.captura_mensaje)
+
+    def intercambia_llaves(self):
+        aux = 1
+        self.socketcliente.write_text(self.llave_publica())
+        while aux:
+            if '-----BEGIN PUBLIC KEY-----' in self.socketservidor.ultimo_mensaje:
+                logging.debug("OBJETO : Llave recibida!")
+                self.llavePublicaReceptor = str.encode(self.socketservidor.ultimo_mensaje)
+                aux = 0
+
+    # Metodo para capturar mensaje de la terminal
+    def captura_mensaje(self):
+        while True:
+            self.socketcliente.write_text(input())
+
+    def termina_comunicacion(self):
+        while not self.read.done() and not self.write.done():
+            pass
+        self.captura.cancel()
+        self.socketcliente.close()
+        self.socketservidor.close()

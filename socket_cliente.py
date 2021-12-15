@@ -42,12 +42,13 @@ class SocketClient:
     def close(self):
         self.node.shutdown(socket.SHUT_RDWR)
         self.node.close()
-        logging.debug(">CLIENTE socket cerrado")
+        logging.debug("CLIENTE : socket cerrado")
 
     # Metodo que envia el mensaje por el socket
     def send_sms(self, sms):
         self.node.send(sms.encode())
-        self.resp = ""
+        if sms != "exit":
+            self.resp = ""
 
     # Metodo que procesa la informacion que se va a mandar
     def write(self):
@@ -55,9 +56,12 @@ class SocketClient:
             if self.resp == "":
                 pass
             else:
-                aux = ":" + self.resp
-                logging.debug(">>{}".format(aux))
+                aux = self.resp
                 self.send_sms(aux)
+
+    # Metodo que recibe un texto a enviar desde le programa
+    def write_text(self, texto):
+        self.resp = texto
 
     # Metodo que procesa los datos que se reciben por el socket
     def read(self):
@@ -70,24 +74,3 @@ class SocketClient:
                 extrae = message.split(":")
                 if extrae[1] != "exit":
                     message = ""
-
-    # Metodo para capturar mensaje de la terminal
-    def captura_mensaje(self):
-        while True:
-            self.resp = input()
-
-    # Metodo que ejecuta los hilos de comunicacion
-    def comunicacion(self):
-        write = self.tpe_comunicacion.submit(self.write)
-        read = self.tpe_comunicacion.submit(self.read)
-        self.saludo()
-        self.habilita_terminal()
-        while not write.done() and not read.done():
-            pass
-        self.close()
-
-    def habilita_terminal(self):
-        self.tpe_comunicacion.submit(self.captura_mensaje)
-
-    def saludo(self):
-        self.resp = "Hola"
