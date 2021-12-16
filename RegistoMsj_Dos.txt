@@ -1,0 +1,7 @@
+ID: 0, MSJ: b'-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCjivEfTub6fFwN24TL+WK9PvOS\nTDuMruwsnbtYE9EkHgOxP9rh94LtyHYNTldzHQnH5sgU/AlqV1kfXiLbxNAx/Shy\nYkRiDsFQm+Ql8pf3QwUiugAZ29CIXwhZtmVzviB+TP16sv3MPzsbZFP21Ut2OysA\nSxjbktc9toqQl9MInQIDAQAB\n-----END PUBLIC KEY-----'
+ID: 1, MSJ: Hola
+ID: 2, MSJ: mensaje dos
+ID: 3, MSJ: mensaje tres
+ID: 4, MSJ: mensaje cuatro
+ID: 5, MSJ: otro
+ID: 6, MSJ: exit

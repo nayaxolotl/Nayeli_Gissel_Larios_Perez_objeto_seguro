@@ -4,4 +4,6 @@ Actualicé el código final en el repo :)
 
 FUNCIONAMIENTO
 
-Se corre el main y se captura el mensaje que envía Obj2 -> OBj1 y luego el que envía Obj1 -> Obj2
+Desde la terminal se puede ejecutar el archivo main.py.
+El programa pedirá el nombre que se le quiere asignar al objeto, después pedirá el puerto del socket servidor y al final se debe ingresar el puerto del socket cliente.
+Después del intercambio de llaves se puede ingresar el texto a enviar en la terminal.

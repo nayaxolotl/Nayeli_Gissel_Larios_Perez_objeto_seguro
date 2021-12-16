@@ -1,0 +1,6 @@
+ID: 0, MSJ: b'-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC0G1VaQLTmJw1CIF+a77PVNlwK\n1a3lbWO1jqh+Xbk2vbFV3CFM0dR1ejB+apoga6dbolFvkmqexmmqFaEg5yWZeKjw\nbqcIJTeM+hPDS+EbYsqz7uxCqPUAKBRcsuzaN7IpAp27KZnNqr0EUEgZCg8+e794\nx5R6zQLwZ2aQEx1hIQIDAQAB\n-----END PUBLIC KEY-----'
+ID: 1, MSJ: Hola
+ID: 2, MSJ: otro
+ID: 3, MSJ: mensaje
+ID: 4, MSJ: al
+ID: 5, MSJ: socket
